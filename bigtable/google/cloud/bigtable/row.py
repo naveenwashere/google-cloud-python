@@ -107,7 +107,7 @@ class _SetDeleteRow(Row):
         """
         raise NotImplementedError
 
-    def _set_cell(self, column_family_id, column, value, timestamp=None, state=None):
+    def _set_cell(self, column_family_id, column, value, timestamp=None, state=None, encoding='ascii'):
         """Helper for :meth:`set_cell`
 
         Adds a mutation to set the value in a specific cell.
@@ -135,8 +135,12 @@ class _SetDeleteRow(Row):
         :type state: bool
         :param state: (Optional) The state that is passed along to
                       :meth:`_get_mutations`.
+
+        :type encoding: str
+        :param state: (Optional) The encoding type to be used for the value.
+                      Defaults to :data:`ascii`.
         """
-        column = _to_bytes(column)
+        column = _to_bytes(column, encoding=encoding)
         if isinstance(value, six.integer_types):
             value = _PACK_I64(value)
         value = _to_bytes(value)
@@ -524,7 +528,7 @@ class ConditionalRow(_SetDeleteRow):
         return resp.predicate_matched
 
     # pylint: disable=arguments-differ
-    def set_cell(self, column_family_id, column, value, timestamp=None, state=True):
+    def set_cell(self, column_family_id, column, value, timestamp=None, state=True, encoding='ascii'):
         """Sets a value in this row.
 
         The cell is determined by the ``row_key`` of this
@@ -559,9 +563,13 @@ class ConditionalRow(_SetDeleteRow):
         :type state: bool
         :param state: (Optional) The state that the mutation should be
                       applied in. Defaults to :data:`True`.
+
+        :type encoding: str
+        :param state: (Optional) The encoding type to be used for the value.
+                      Defaults to :data:`ascii`.
         """
         self._set_cell(
-            column_family_id, column, value, timestamp=timestamp, state=state
+            column_family_id, column, value, timestamp=timestamp, state=state, encoding=encoding
         )
 
     def delete(self, state=True):
